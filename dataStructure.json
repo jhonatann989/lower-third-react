@@ -1,0 +1,10 @@
+{
+    "type": "card|animatedText|fingerprint|mainText",
+    "verticalPosition":"top|bottom",
+    "horizontalPosition": "left|right (it will be ignored for animated text adn main text)",
+    "icon": "a base64 data",
+    "title": "a title",
+    "description": "a description (it will be ignored for animated text adn main text)",
+    "isVisibleDuring": "seconds",
+    "isHiddenDuring": "seconds"
+}
