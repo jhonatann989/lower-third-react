@@ -21,21 +21,28 @@ export default function Panel(props) {
 
     const handleBottomCenter = () => {
         if (props.bottomCenter.isOpen) {
-            props.handleBottomCenter()
+            props.handleBottomCenter("bottomCenterIsOpen", false)
         } else {
-            props.handleBottomCenter()
+            props.handleBottomCenter("bottomCenterIsOpen", true)
+            props.handleBottomLeft("bottomLeftIsOpen", false)
+            props.handleBottomLeft("bottomRightIsOpen", false)
         }
-
     }
 
-    const handleHideAll = () => {
-        props.handleBottomCenter()
+    const handleTransthird = () => {
+        if (props.transthird.isOpen) {
+            props.handleTransthird("bottomCenterIsOpen", false)
+        } else {
+            props.handleTransthird("bottomCenterIsOpen", true)
+            props.handleBottomLeft("bottomLeftIsOpen", false)
+            props.handleBottomLeft("bottomRightIsOpen", false)
+        }
     }
     return (
         <div style={{ zoom: "80%" }}>
             <AppBar position='sticky' sx={{ background: "#FFF" }}>
                 <FormGroup row={true} sx={{ justifyContent: "center" }} >
-                    <FormControlLabel control={<Checkbox onChange={() => props.handleTransthird()} checked={props.transthird.isOpen} />} label={<DocumentScanner sx={{ color: "#000" }} />} />
+                    <FormControlLabel control={<Checkbox onChange={() => handleTransthird()} checked={props.transthird.isOpen} />} label={<DocumentScanner sx={{ color: "#000" }} />} />
                 </FormGroup>
             </AppBar>
             <PanelItem
@@ -115,7 +122,7 @@ export default function Panel(props) {
                 autoHideValue={props.bottomCenter.autoHide}
                 isOpen={props.bottomCenter.isOpen}
                 domPrefix="bottomCenter"
-                handleIsOpen={() => props.handleBottomCenter()}
+                handleIsOpen={() => handleBottomCenter()}
                 onUpdateClick={() => {
                     setStorageData("bottomCenterTitle", document.getElementById("bottomCenterTitle").value)
                     setStorageData("bottomCenterSubheader", document.getElementById("bottomCenterSubheader").value)
@@ -125,7 +132,7 @@ export default function Panel(props) {
                     autoHideRutine(
                         document.getElementById("bottomCenterAutoHide").value,
                         () => {
-                            props.handleBottomCenter()
+                            handleBottomCenter()
                             props.handleBottomCenter("bottomCenterAutoHide", "0")
                         })
                 }}

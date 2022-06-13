@@ -134,9 +134,15 @@ function App() {
     }
   }
 
-  const handleTransthird = () => {
-    setStorageData("transthirdIsOpen", !transthird.isOpen)
-    setTransthird({ ...transthird, isOpen: !transthird.isOpen })
+  const handleTransthird = (key = "transthirdIsOpen", value = undefined) => {
+    
+    if (key == "transthirdIsOpen" && value == undefined) {
+      setStorageData("transthirdIsOpen", !transthird.isOpen)
+      setTransthird({ ...transthird, isOpen: !transthird.isOpen })
+    } else {
+      setStorageData("transthirdIsOpen", !transthird.isOpen)
+      setTransthird({ ...transthird, [key]: value })
+    }
   }
 
   return (
