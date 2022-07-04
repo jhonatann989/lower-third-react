@@ -160,6 +160,7 @@ export default function Panel(props) {
                         })
                 }}
             />
+            <PanelItem alternative={true} id={1} />
 
         </div>
     );
