@@ -1,184 +1,25 @@
 import * as React from 'react';
-import Slide, { SlideProps } from '@mui/material/Slide';
-import Snackbars from './Snackbars';
 import Panel from './Panel';
-import SingleSackbar from './SimpleSnackbar';
+import SimpleSnackbar from './SimpleSnackbar';
 
 
 
 function App() {
-  const [calledTimeOut, setCalledTimeout] = React.useState(0)
-  const [topLeft, setTopLeft] = React.useState({
-    isOpen: getStorageData("topLeftIsOpen"),
-    title: getStorageData("topLeftTitle"),
-    subheader: getStorageData("topLeftSubheader"),
-    autoHide: getStorageData("topLeftAutoHide")
-  })
-  const [topRight, setTopRight] = React.useState({
-    isOpen: getStorageData("topRightIsOpen"),
-    title: getStorageData("topRightTitle"),
-    subheader: getStorageData("topRightSubheader"),
-    autoHide: getStorageData("topRightAutoHide")
-  })
-  const [bottomLeft, setBottomLeft] = React.useState({
-    isOpen: getStorageData("bottomLeftIsOpen"),
-    title: getStorageData("bottomLeftTitle"),
-    subheader: getStorageData("bottomLeftSubheader"),
-    autoHide: getStorageData("bottomLeftAutoHide")
-  })
-  const [bottomCenter, setBottomCenter] = React.useState({
-    isOpen: getStorageData("bottomCenterIsOpen"),
-    title: getStorageData("bottomCenterTitle"),
-    subheader: getStorageData("bottomCenterSubheader"),
-    autoHide: getStorageData("bottomCenterAutoHide")
-  })
-  const [bottomRight, setBottomRight] = React.useState({
-    isOpen: getStorageData("bottomRightIsOpen"),
-    title: getStorageData("bottomRightTitle"),
-    subheader: getStorageData("bottomRightSubheader"),
-    autoHide: getStorageData("bottomRightAutoHide")
-  })
-  const [transthird, setTransthird] = React.useState({
-    isOpen: getStorageData("transthirdIsOpen"),
-    autoHide: getStorageData("transthirdAutoHide"),
-    title: getCurrentSlideData(),
-  })
-
-  if (calledTimeOut == 0) {
-    setTimeout(() => {
-      setCalledTimeout(calledTimeOut + 1)
-      setTopLeft({
-        isOpen: getStorageData("topLeftIsOpen"),
-        title: getStorageData("topLeftTitle"),
-        subheader: getStorageData("topLeftSubheader"),
-        autoHide: getStorageData("topLeftAutoHide")
-      })
-      setTopRight({
-        isOpen: getStorageData("topRightIsOpen"),
-        title: getStorageData("topRightTitle"),
-        subheader: getStorageData("topRightSubheader"),
-        autoHide: getStorageData("topRightAutoHide")
-      })
-      setBottomLeft({
-        isOpen: getStorageData("bottomLeftIsOpen"),
-        title: getStorageData("bottomLeftTitle"),
-        subheader: getStorageData("bottomLeftSubheader"),
-        autoHide: getStorageData("bottomLeftAutoHide")
-      })
-      setBottomCenter({
-        isOpen: getStorageData("bottomCenterIsOpen"),
-        title: getStorageData("bottomCenterTitle"),
-        subheader: getStorageData("bottomCenterSubheader"),
-        autoHide: getStorageData("bottomCenterAutoHide")
-      })
-      setBottomRight({
-        isOpen: getStorageData("bottomRightIsOpen"),
-        title: getStorageData("bottomRightTitle"),
-        subheader: getStorageData("bottomRightSubheader"),
-        autoHide: getStorageData("bottomRightAutoHide")
-      })
-      setTransthird({
-        isOpen: getStorageData("transthirdIsOpen"),
-        autoHide: getStorageData("transthirdAutoHide"),
-        title: getCurrentSlideData()
-      })
-    }, 500)
-  } else { setCalledTimeout(calledTimeOut - 1) }
-
-  const handleTopLeft = (key = "topLeftIsOpen", value = undefined) => {
-    if (key == "topLeftIsOpen") {
-      setStorageData("topLeftIsOpen", !topLeft.isOpen)
-      setTopLeft({ ...topLeft, isOpen: !topLeft.isOpen })
-      if(topLeft.isOpen == false) { autoHideRutine(topLeft.autoHide, () => setTopLeft({ ...topLeft, isOpen: false })) }
-    } else {
-      setStorageData(key, value)
-      setTopLeft({ ...topLeft, [key]: value })
-    }
-  }
-
-  const handleTopRight = (key = "topRightIsOpen", value = undefined) => {
-    if (key == "topRightIsOpen") {
-      setStorageData("topRightIsOpen", !topRight.isOpen)
-      setTopRight({ ...topRight, isOpen: !topRight.isOpen })
-    } else {
-      setStorageData(key, value)
-      setTopRight({ ...topRight, [key]: value })
-    }
-
-  }
-  const handleBottomLeft = (key = "bottomLeftIsOpen", value = undefined) => {
-    if (key == "bottomLeftIsOpen" && value == undefined) {
-      setStorageData("bottomLeftIsOpen", !bottomLeft.isOpen)
-      setBottomLeft({ ...bottomLeft, isOpen: !bottomLeft.isOpen })
-    } else {
-      setStorageData(key, value)
-      setBottomLeft({ ...bottomLeft, [key]: value })
-    }
-  }
-  const handleBottomCenter = (key = "bottomCenterIsOpen", value = undefined) => {
-    if (key == "bottomCenterIsOpen") {
-      setStorageData("bottomCenterIsOpen", !bottomCenter.isOpen)
-      setBottomCenter({ ...bottomCenter, isOpen: !bottomCenter.isOpen })
-    } else {
-      setStorageData(key, value)
-      setBottomCenter({ ...bottomCenter, [key]: value })
-    }
-  }
-  const handleBottomRight = (key = "bottomRightIsOpen", value = undefined) => {
-    if (key == "bottomRightIsOpen" && value == undefined) {
-      setStorageData("bottomRightIsOpen", !bottomRight.isOpen)
-      setBottomRight({ ...bottomRight, isOpen: !bottomRight.isOpen })
-    } else {
-      setStorageData(key, value)
-      setBottomRight({ ...bottomRight, [key]: value })
-    }
-  }
-
-  const handleTransthird = (key = "transthirdIsOpen", value = undefined) => {
-    
-    if (key == "transthirdIsOpen" && value == undefined) {
-      setStorageData("transthirdIsOpen", !transthird.isOpen)
-      setTransthird({ ...transthird, isOpen: !transthird.isOpen })
-    } else {
-      setStorageData("transthirdIsOpen", !transthird.isOpen)
-      setTransthird({ ...transthird, [key]: value })
-    }
-  }
 
   return (
     <div>
       <div id="currentslide" style={{ display: "none" }}></div>
       {(document.location.href.split("?")[document.location.href.split("?").length - 1]) == "panel" ?
-        <React.Fragment>
-          <Panel
-            topLeft={topLeft}
-            handleTopLeft={handleTopLeft}
-            topRight={topRight}
-            handleTopRight={handleTopRight}
-            bottomLeft={bottomLeft}
-            handleBottomLeft={handleBottomLeft}
-            bottomCenter={bottomCenter}
-            handleBottomCenter={handleBottomCenter}
-            bottomRight={bottomRight}
-            handleBottomRight={handleBottomRight}
-            transthird={transthird}
-            handleTransthird={handleTransthird}
-          />
-        </React.Fragment>
+          <Panel />
         :
         <React.Fragment>
-          <Snackbars
-            topLeft={topLeft}
-            topRight={topRight}
-            bottomLeft={bottomLeft}
-            bottomCenter={bottomCenter}
-            bottomRight={bottomRight}
-            transthird={transthird}
-            encodedLogo={encodedLogo}
-          />
-          <SingleSackbar snackbarId={1} />
+          <SimpleSnackbar snackbarId={1} />
+          <SimpleSnackbar snackbarId={2} />
+          <SimpleSnackbar snackbarId={3} />
+          <SimpleSnackbar snackbarId={4} />
+          <SimpleSnackbar snackbarId={5} />
+          <SimpleSnackbar snackbarId={6} />
         </React.Fragment>
-
       }
     </div>
   );
@@ -242,19 +83,7 @@ export function getCurrentSlideData () {
 }
 
 
-export function getTransition(transition) {
-  let useTransition = undefined
-  if (transition) {
-    switch (transition) {
-      case "left": useTransition = props => <Slide {...props} direction="left" />; break;
-      case "right": useTransition = props => <Slide {...props} direction="right" />; break;
-      case "up": useTransition = props => <Slide {...props} direction="up" />; break;
-      case "down": useTransition = props => <Slide {...props} direction="down" />; break;
-      default: useTransition = null
-    }
-  }
-  return useTransition
-}
+
 
 
 export function setInitialData() {

@@ -2,22 +2,22 @@
 import * as React from 'react';
 import {
     Typography, FormGroup, TextField, Button, FilledInput, Divider, FormControlLabel,
-    CircularProgress, Collapse, IconButton, Checkbox, Paper, FormControl, InputLabel, MenuItem, Select, Badge
+    CircularProgress, Collapse, IconButton, Checkbox, Paper, FormControl, InputLabel, Select, Badge, Switch
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { CheckCircle, Timer, } from '@mui/icons-material';
+import { CheckCircle, Timer, DocumentScanner } from '@mui/icons-material';
 import { getStorageData, setStorageData, autoHideRutine } from '../App';
 import { ArrowForward } from '@mui/icons-material';
 
 export function PanelItem(props) {
-    const {id} = props
-    const defaultValues = { 
-        isOpen: false, 
-        title: "", 
-        subHeader: "", 
-        vertical: "top", 
-        horizontal: "left", 
-        hasAvatar: false, 
+    const { id } = props
+    const defaultValues = {
+        isOpen: false,
+        title: "",
+        subHeader: "",
+        vertical: "top",
+        horizontal: "left",
+        hasAvatar: false,
         useOpenLpSource: false,
         autoHideValue: 0,
         isAutoHiding: false
@@ -25,12 +25,12 @@ export function PanelItem(props) {
     const rotations = {
         top: {
             left: "rotate(-135deg)",
-            center:" rotate(270deg)",
+            center: " rotate(270deg)",
             right: "rotate(-45deg)"
         },
         bottom: {
             left: "rotate(135deg)",
-            center:" rotate(-270deg)",
+            center: " rotate(-270deg)",
             right: "rotate(45deg)"
         }
     }
@@ -38,8 +38,8 @@ export function PanelItem(props) {
     const [open, setOpen] = React.useState(false)
     const [properties, setProperties] = React.useState(defaultValues)
 
-    const handleClick = () => {  
-        setOpen(!open);  
+    const handleClick = () => {
+        setOpen(!open);
         updateData()
     };
     const handleIsOpen = () => {
@@ -49,21 +49,29 @@ export function PanelItem(props) {
         setStorageData(`Snackbar_${id}`, JSON.stringify(copyProperties))
         checkData()
     }
+    const handleUseOpenLpSource = () => {
+        let copyProperties = properties
+        copyProperties.useOpenLpSource = !copyProperties.useOpenLpSource
+        setPropertyValue("useOpenLpSource", !copyProperties.useOpenLpSource)
+        setStorageData(`Snackbar_${id}`, JSON.stringify(copyProperties))
+        checkData()
+    }
     const handleAutoHide = () => {
         setPropertyValue("isAutoHiding", true)
-        autoHideRutine(document.getElementById(`autoHideValue_${id}`).value, () => {
+        autoHideRutine(properties.autoHideValue, () => {
             handleIsOpen()
             setPropertyValue("autoHideValue", 0)
             setPropertyValue("isAutoHiding", false)
         })
     }
+    
 
-    const setPropertyValue = (key, value) => { setProperties({ ...properties, [key]: value })  }
+    const setPropertyValue = (key, value) => { setProperties({ ...properties, [key]: value }) }
 
     const checkData = () => {
         setDidConsultLocalStorage(true)
         let localStorageData = getStorageData(`Snackbar_${id}`)
-        if(localStorageData !== null && localStorageData !== undefined) {
+        if (localStorageData !== null && localStorageData !== undefined) {
             setProperties(JSON.parse(localStorageData))
         }
     }
@@ -73,30 +81,39 @@ export function PanelItem(props) {
     }
     const getRotation = () => {
         let vertical, horizontal = ""
-        if(properties.vertical && properties.vertical.length) { vertical = properties.vertical } 
-        else { vertical  = defaultValues.vertical }
-        if(properties.horizontal && properties.horizontal.length) { horizontal = properties.horizontal } 
-        else { horizontal  = defaultValues.horizontal }
+        if (properties.vertical && properties.vertical.length) { vertical = properties.vertical }
+        else { vertical = defaultValues.vertical }
+        if (properties.horizontal && properties.horizontal.length) { horizontal = properties.horizontal }
+        else { horizontal = defaultValues.horizontal }
         return rotations[vertical][horizontal]
     }
 
-    if(didConsultLocalstorage == false) { checkData() }
+    if (didConsultLocalstorage == false) { checkData() }
 
     return (
         <React.Fragment>
             {props.alternative ?
                 <Paper elevation={3} sx={{ padding: "1vw" }}>
                     <FormGroup row={true} sx={{ justifyContent: "space-between", alignItems: "center" }} >
-                        <FormControlLabel 
-                            color='#FFF' 
-                            control={<Checkbox onChange={handleIsOpen} checked={properties.isOpen} />} 
-                            label={<ArrowForward sx={{ transform: getRotation() }} />} 
-                        />
-                        <Badge badgeContent={properties.autoHideValue}>
-                            <IconButton onClick={handleAutoHide}  disabled={properties.isAutoHiding} >
-                                {properties.isAutoHiding? <CircularProgress size={25} /> : <Timer />}
-                            </IconButton>
-                        </Badge>
+                        <div style={{display: "flex"}}>
+                            <FormControlLabel
+                                color='#FFF'
+                                control={<Switch onChange={handleIsOpen} checked={properties.isOpen} />}
+                                label={<ArrowForward sx={{ transform: getRotation() }} />}
+                            />
+                            <Divider orientation='vertical' flexItem style={{marginLeft: "1vw", marginRight: "1vw"}} />
+                            <FormControlLabel
+                                control={<Checkbox onChange={handleUseOpenLpSource} checked={(properties.useOpenLpSource)} />}
+                                label={<DocumentScanner sx={{ color: "#000" }} />}
+                            />
+                            <Divider orientation='vertical' flexItem style={{marginLeft: "1vw", marginRight: "1vw"}} />
+                            <Badge badgeContent={properties.autoHideValue}>
+                                <IconButton onClick={handleAutoHide} disabled={properties.isAutoHiding} >
+                                    {properties.isAutoHiding ? <CircularProgress size={25} /> : <Timer />}
+                                </IconButton>
+                            </Badge>
+                            <Divider orientation='vertical' flexItem style={{marginLeft: "1vw", marginRight: "1vw"}} />
+                        </div>
                         <Typography sx={{ fontWeight: "bold" }} color={properties.isOpen ? "" : "error"}>{properties.title}</Typography>
                         <IconButton onClick={handleClick}><ExpandMoreIcon /></IconButton>
                     </FormGroup>
@@ -164,7 +181,7 @@ export function PanelItem(props) {
                                         <option value={false}>No</option>
                                     </Select>
                                 </FormControl>
-                                <FormControl variant="filled">
+                                {/* <FormControl variant="filled">
                                     <InputLabel id="openlp-select">Use Open LP Text</InputLabel>
                                     <Select
                                         native={true}
@@ -176,7 +193,7 @@ export function PanelItem(props) {
                                         <option value={true}>Yes</option>
                                         <option value={false}>No</option>
                                     </Select>
-                                </FormControl>
+                                </FormControl> */}
                                 <Button onClick={() => updateData()} variant="contained" >
                                     <CheckCircle />
                                 </Button>
