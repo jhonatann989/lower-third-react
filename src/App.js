@@ -1,7 +1,6 @@
 import * as React from 'react';
-import Panel from './Panel';
 import SimpleSnackbar from './SimpleSnackbar';
-
+import { PanelItem } from './components/PanelItem';
 
 
 function App() {
@@ -10,16 +9,23 @@ function App() {
     <div>
       <div id="currentslide" style={{ display: "none" }}></div>
       {(document.location.href.split("?")[document.location.href.split("?").length - 1]) == "panel" ?
-          <Panel />
+        <div style={{ zoom: "80%" }}>
+          <PanelItem id={1} />
+          <PanelItem id={2} />
+          <PanelItem id={3} />
+          <PanelItem id={4} />
+          <PanelItem id={5} />
+          <PanelItem id={6} />
+        </div>
         :
-        <React.Fragment>
+        <div style={{width:"100%", height: "100vh", display:"flex", flexDirection: "column", justifyContent:"space-between", overflow:"hidden"}}>
           <SimpleSnackbar snackbarId={1} />
           <SimpleSnackbar snackbarId={2} />
           <SimpleSnackbar snackbarId={3} />
           <SimpleSnackbar snackbarId={4} />
           <SimpleSnackbar snackbarId={5} />
           <SimpleSnackbar snackbarId={6} />
-        </React.Fragment>
+        </div>
       }
     </div>
   );
@@ -66,15 +72,17 @@ export function setStorageData(key, value) {
 
 }
 
-export function autoHideRutine(seconds, callback) { 
-  if(typeof Number(seconds) == "number" && !isNaN(Number(seconds)) && Number(seconds) > 0) {
-    setTimeout(callback, seconds * 1000) 
+export function autoHideRutine(seconds, callback) {
+  let timeoutObject = null
+  if (typeof Number(seconds) == "number" && !isNaN(Number(seconds)) && Number(seconds) > 0) {
+    timeoutObject = setTimeout(callback, seconds * 1000)
   }
+  return timeoutObject
 }
 
-export function getCurrentSlideData () {
+export function getCurrentSlideData() {
   let returnText = ""
-  if(document.getElementById("currentslide")) {
+  if (document.getElementById("currentslide")) {
     document.getElementById("currentslide").childNodes.forEach(node => {
       if (typeof node.nodeValue == "string") { returnText += `${node.nodeValue} \n` }
     })

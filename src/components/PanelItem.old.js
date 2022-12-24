@@ -1,19 +1,18 @@
 
 import * as React from 'react';
 import {
-    Typography, FormGroup, TextField, Button,  Divider,  Card, CardHeader, Avatar, 
-    CircularProgress, Paper, FormControl,  Badge, Switch, FormLabel, Dialog, DialogContent, DialogActions, ButtonGroup, Slider
+    Typography, FormGroup, TextField, Button, FilledInput, Divider, FormControlLabel, Card, CardHeader, Avatar, 
+    CircularProgress, Collapse, IconButton, Checkbox, Paper, FormControl, InputLabel, Select, Badge, Switch, Modal, Fade, RadioGroup, Radio, FormLabel, Dialog, DialogContent, DialogActions, ButtonGroup, Slider, LinearProgress
 } from '@mui/material';
-import { CheckCircle, Timer, Edit, Close, TimerOff, VerticalAlignTop, VerticalAlignBottom, VerticalAlignCenter } from '@mui/icons-material';
-import { autoHideRutine, encodedLogo } from '../App';
+import { CheckCircle, Timer, DocumentScanner, Edit, Close, ArrowCircleRightRounded, ArrowCircleRightSharp, TimerOff, VerticalAlignTop, VerticalAlignBottom, VerticalAlignCenter } from '@mui/icons-material';
+import { getStorageData, setStorageData, autoHideRutine, encodedLogo } from '../App';
 import { ArrowForward } from '@mui/icons-material';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { darkTheme } from '../SimpleSnackbar';
-import { getLowerThirdData, setLowerThirdData } from './dataRetriever';
 
 
 export function PanelItem(props) {
-    const { id } = props
+    const { id, type} = props
     const defaultValues = {
         isOpen: false,
         title: "",
@@ -57,13 +56,16 @@ export function PanelItem(props) {
     const [titleRef, setTitleRef] = React.useState(null)
     const [timeoutObject, setTimeoutObject] = React.useState(() => {})
 
-    const handleClick = () => { setOpen(!open); };
-
-    const handleIsOpen = async () => { 
-        let data = await setLowerThirdData(id, {isOpen: !properties.isOpen})
-        if (!data.hasOwnProperty("ERROR")) { setProperties(data.data) }
+    const handleClick = () => {
+        setOpen(!open);
+    };
+    const handleIsOpen = () => {
+        let copyProperties = properties
+        copyProperties.isOpen = !copyProperties.isOpen
+        setPropertyValue("isOpen", !copyProperties.isOpen)
+        setStorageData(`Snackbar_${id}`, JSON.stringify(copyProperties))
+        checkData()
     }
-    
     const handleAutoHide = () => {
         setPropertyValue("isAutoHiding", true)
         setTimeoutObject(autoHideRutine(properties.autoHideValue, () => {
@@ -75,14 +77,16 @@ export function PanelItem(props) {
 
     const setPropertyValue = (key, value) => { setProperties(properties => ({ ...properties, [key]: value })) }
 
-    const checkData = async () => {
+    const checkData = () => {
         setDidConsultLocalStorage(true)
-        let data = await getLowerThirdData(id)
-        if (!data.hasOwnProperty("ERROR")) { setProperties(data.data) }
+        let localStorageData = getStorageData(`Snackbar_${id}`)
+        if (localStorageData !== null && localStorageData !== undefined) {
+            setProperties(JSON.parse(localStorageData))
+        }
     }
-    const updateData = async () => {
-        let data = await setLowerThirdData(id, properties)
-        if (!data.hasOwnProperty("ERROR")) { setProperties(data.data) }
+    const updateData = () => {
+        setStorageData(`Snackbar_${id}`, JSON.stringify(properties))
+        checkData()
     }
     
     const getRotation = () => {
@@ -110,35 +114,42 @@ export function PanelItem(props) {
 
     return (
         <React.Fragment>
-            <Paper elevation={3} sx={{ padding: "1vw", marginLeft: "1vw", marginRight: "1vw", marginTop: "1vh", marginBottom: "1vh" }} >
+            <Paper
+                elevation={3}
+                sx={{ padding: "1vw", marginLeft: "1vw", marginRight: "1vw", marginTop: "1vh", marginBottom: "1vh" }}
+            >
                 <FormGroup row={true} sx={{ justifyContent: "space-between", alignItems: "center" }} >
                     <div style={{ display: "flex" }}>
                         <Button onClick={handleIsOpen} color={properties.isOpen? "success" : "primary"} variant={properties.isOpen? "contained" : "outlined"} ><ArrowForward sx={{ transform: getRotation() }} /></Button>
                         <Divider orientation='vertical' flexItem style={{ marginLeft: "1vw", marginRight: "1vw" }} />
-                        <Button variant="outlined" onClick={properties.isAutoHiding ? () => resetTimeout(timeoutObject) : handleAutoHide}  disabled={(properties.autoHideValue == 0)} >
+                        <Button 
+                            variant="outlined" 
+                            onClick={properties.isAutoHiding ? () => resetTimeout(timeoutObject) : handleAutoHide} 
+                            disabled={(properties.autoHideValue == 0)} 
+                        >
                             <Badge badgeContent={properties.isAutoHiding ? <CircularProgress size={10} /> : properties.autoHideValue}>
                                 {properties.isAutoHiding ? <TimerOff color='secondary' /> : <Timer />}
                             </Badge>
+
                         </Button>
                         <Divider orientation='vertical' flexItem style={{ marginLeft: "1vw", marginRight: "1vw" }} />
                         <Button variant="outlined" onClick={handleClick}><Edit /></Button>
                     </div>
                     <Typography sx={{ fontWeight: "bold" }} color={properties.isOpen ? "" : "error"}>{properties.title}</Typography>
                 </FormGroup>
+                {open && <Divider />}
                 <Dialog open={open} onClose={handleClick} onAnimationEnd={() => {titleRef?.focus()}} fullScreen={true} onKeyUp={closeByKeyEvent}>
                     <DialogContent>
                         <ThemeProvider theme={darkTheme}>
                             <Card>
                                 <CardHeader 
-                                avatar={
-                                    <div style={{display: "flex", flexDirection: "column"}}>
-                                        <Avatar src={encodedLogo} sx={{ width: 50, height: 50 }} />
-                                        <Switch 
-                                            onChange={() => setPropertyValue("hasAvatar", !properties.hasAvatar)}
-                                            checked={properties.hasAvatar}
-                                        />
-                                    </div>
-                                } 
+                                avatar={<div style={{display: "flex", flexDirection: "column"}}>
+                                    <Avatar src={encodedLogo} sx={{ width: 50, height: 50 }} />
+                                    <Switch 
+                                        onChange={() => setPropertyValue("hasAvatar", !properties.hasAvatar)}
+                                        checked={properties.hasAvatar}
+                                    />
+                                </div>} 
                                 title={
                                     <TextField
                                         variant='filled'
@@ -179,30 +190,48 @@ export function PanelItem(props) {
                             <Divider />
                             <FormControl variant="filled">
                                 <FormLabel id="vertical-select">Vertical </FormLabel>
-                                <ButtonGroup id="vertical" >
-                                    <Button onClick={() => setPropertyValue("vertical", "top")} variant={properties.vertical == "top" ? "contained" : "outlined"}>
-                                        {/* Top */}
+                                <ButtonGroup
+                                    // labelId="vertical-select"
+                                    id="vertical"
+                                >
+                                    <Button 
+                                        onClick={() => setPropertyValue("vertical", "top")} 
+                                        variant={properties.vertical == "top" ? "contained" : "outlined"}
+                                    >
                                         <VerticalAlignTop />
+                                        {/* Top */}
                                     </Button>
                                     <Button 
                                         onClick={() => setPropertyValue("vertical", "bottom")} 
                                         variant={properties.vertical == "bottom" ? "contained" : "outlined"}
                                     >
-                                        {/* Bottom */}
                                         <VerticalAlignBottom />
+                                        {/* Bottom */}
                                     </Button>
                                 </ButtonGroup>
                             </FormControl>
                             <FormControl variant="filled">
                                 <FormLabel id="horizontal-select">Horizontal</FormLabel>
-                                <ButtonGroup id="vertical" >
-                                    <Button onClick={() => setPropertyValue("horizontal", "left")} variant={properties.horizontal == "left" ? "contained" : "outlined"} >
+                                <ButtonGroup
+                                    // labelId="vertical-select"
+                                    id="vertical"
+                                >
+                                    <Button 
+                                            onClick={() => setPropertyValue("horizontal", "left")} 
+                                            variant={properties.horizontal == "left" ? "contained" : "outlined"}
+                                        >
                                             <VerticalAlignTop style={{transform: "rotate(270deg)"}} />
                                         </Button>
-                                        <Button onClick={() => setPropertyValue("horizontal", "center")} variant={properties.horizontal == "center" ? "contained" : "outlined"} >
+                                        <Button 
+                                            onClick={() => setPropertyValue("horizontal", "center")} 
+                                            variant={properties.horizontal == "center" ? "contained" : "outlined"}
+                                        >
                                             <VerticalAlignCenter style={{transform: "rotate(90deg)"}} />
                                         </Button>
-                                        <Button onClick={() => setPropertyValue("horizontal", "right")} variant={properties.horizontal == "right" ? "contained" : "outlined"}>
+                                        <Button 
+                                            onClick={() => setPropertyValue("horizontal", "right")} 
+                                            variant={properties.horizontal == "right" ? "contained" : "outlined"}
+                                        >
                                             <VerticalAlignTop style={{transform: "rotate(90deg)"}} />
                                         </Button>
                                 </ButtonGroup>

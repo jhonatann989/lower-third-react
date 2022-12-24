@@ -1,50 +1,50 @@
 import * as React from 'react';
-import { Snackbar, Card, CardHeader, Avatar, CardContent, Typography } from "@mui/material"
+import { Snackbar, Card, CardHeader, Avatar, CardContent, Typography, Fade, Collapse, Grow, Zoom } from "@mui/material"
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { getStorageData, encodedLogo, getCurrentSlideData } from './App';
 import Slide, { SlideProps } from '@mui/material/Slide';
+import { getLowerThirdData, setLowerThirdData } from './components/dataRetriever';
 
 export default function SimpleSnackbar(props) {
   const { snackbarId } = props
   const [properties, setProperties] = React.useState({})
-  const [calledTimeOut, setCalledTimeout] = React.useState(0)
+  const [shouldAnimate, setShouldAnimate] = React.useState(true)
 
-  if (calledTimeOut == 0) {
-    setTimeout(() => {
-      setCalledTimeout(calledTimeOut + 1)
-      let storageProperties = getStorageData(`Snackbar_${snackbarId}`)
-      setProperties(JSON.parse(storageProperties))
+  React.useEffect(() => {
+    let timeout = setTimeout(async () => {
+      let storagePropertiesObject = await getLowerThirdData(snackbarId)
+      storagePropertiesObject = storagePropertiesObject?.data
+      setShouldAnimate((storagePropertiesObject?.isOpen != properties?.isOpen))
+      setProperties(storagePropertiesObject)
     }, 500)
-  } else { setCalledTimeout(calledTimeOut - 1) }
+    return () => clearTimeout(timeout)
+  })
+
 
   return (
     <ThemeProvider theme={darkTheme}>
-        <Snackbar
-          // TransitionComponent={getTransition(properties?.vertical, properties?.horizontal)}
-          anchorOrigin={{ 
-            vertical: properties?.vertical? properties?.vertical : "top", 
-            horizontal: properties?.horizontal? properties?.horizontal : "left"
-          }}
-          open={properties?.isOpen}
-        >
-          <Card >
-            {properties?.useOpenLpSource ?
-              <CardContent>
-                <div style={{ textAlign: properties?.horizontal }}>{getCurrentSlideData()}</div>
-              </CardContent>
-            :
-            <CardHeader 
-              avatar={properties?.hasAvatar === "true"? <Avatar src={encodedLogo} /> : null} 
-              title={properties?.title} 
-              subheader={properties?.subHeader} 
-            />}
-          </Card>
-        </Snackbar>
+      <Snackbar
+        TransitionProps={shouldAnimate ? {} : { appear: false, }}
+        anchorOrigin={{
+          vertical: properties?.vertical ? properties?.vertical : "top",
+          horizontal: properties?.horizontal ? properties?.horizontal : "left"
+        }}
+        sx={{ maxWidth: "30vw" }}
+        open={properties?.isOpen}
+      >
+        <Card>
+          <CardHeader
+            avatar={(properties?.hasAvatar === "true" || properties?.hasAvatar) ? <Avatar src={encodedLogo} sx={{ width: 50, height: 50 }} /> : null}
+            title={properties?.title}
+            subheader={properties?.subHeader}
+          />
+        </Card>
+      </Snackbar>
     </ThemeProvider>
   );
 }
 
-const darkTheme = createTheme({
+export const darkTheme = createTheme({
   components: {
     MuiPaper: {
       styleOverrides: {
@@ -59,21 +59,47 @@ const darkTheme = createTheme({
   },
 });
 
-export function getTransition(vertical, horizontal) {
+export function getTransition(vertical, horizontal, transitionType = "grow") {
   let transition = ""
-  let useTransition = undefined
-  
-  if(horizontal == "center") {transition = vertical}
-  else {transition = horizontal}
-  
-  if (transition) {
-    switch (transition) {
-      case "left": useTransition = props => <Slide {...props} direction="right" />; break;
-      case "right": useTransition = props => <Slide {...props} direction="left" />; break;
-      case "top": useTransition = props => <Slide {...props} direction="down" />; break;
-      case "bottom": useTransition = props => <Slide {...props} direction="up" />; break;
-      default: useTransition = null
+  let useTransition = props => <Fade {...props} />
+
+  if (horizontal == "center") { transition = vertical }
+  else { transition = horizontal }
+
+  if (transitionType == "slide") {
+    if (transition) {
+      switch (transition) {
+        case "left": useTransition = props => <Slide {...props} direction="right" />; break;
+        case "right": useTransition = props => <Slide {...props} direction="left" />; break;
+        case "top": useTransition = props => <Slide {...props} direction="down" />; break;
+        case "bottom": useTransition = props => <Slide {...props} direction="up" />; break;
+      }
     }
   }
+
+  if (transitionType == "collapse") {
+    if (transition) {
+      switch (transition) {
+        case "left":
+        case "right": useTransition = props => <Collapse {...props} orientation="horizontal" />; break;
+        case "top":
+        case "bottom": useTransition = props => <Collapse {...props} orientation="vertical" />; break;
+      }
+    }
+  }
+
+  if (transitionType == "grow") {
+    if (transition) {
+      useTransition = props => <Grow {...props}  />
+    }
+  }
+
+  if (transitionType == "zoom") {
+    if (transition) {
+      useTransition = props => <Zoom {...props}  />
+    }
+  }
+
+
   return useTransition
 }
